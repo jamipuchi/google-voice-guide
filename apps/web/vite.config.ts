@@ -10,6 +10,7 @@ export default defineConfig({
     }
   },
   server: {
+    strictPort: true,
     proxy: {
       '/trpc': 'http://localhost:3001'
     }
