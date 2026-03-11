@@ -2,6 +2,7 @@ import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
+  presets: [require('./src/ui/tailwind.config')],
   theme: {
     extend: {
       colors: {

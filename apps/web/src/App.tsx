@@ -1,6 +1,7 @@
-import { NavLink, Route, Routes } from 'react-router-dom';
+import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import CoachPage from './routes/CoachPage';
 import StackPage from './routes/StackPage';
+import ContactDetailPage from './routes/ContactDetailPage';
 
 const navLinkClassName = ({ isActive }: { isActive: boolean }) =>
   [
@@ -9,6 +10,19 @@ const navLinkClassName = ({ isActive }: { isActive: boolean }) =>
   ].join(' ');
 
 export default function App() {
+  const location = useLocation();
+  const isFullBleed = location.pathname === '/';
+
+  if (isFullBleed) {
+    return (
+      <div className="flex h-screen w-full flex-col">
+        <Routes>
+          <Route path="/" element={<ContactDetailPage />} />
+        </Routes>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-8 sm:px-8 lg:px-10">
       <header className="mb-8 flex flex-col gap-6 rounded-[2rem] border border-black/5 bg-white/60 p-6 shadow-panel backdrop-blur md:flex-row md:items-center md:justify-between">
@@ -21,19 +35,19 @@ export default function App() {
           </h1>
         </div>
         <nav className="flex flex-wrap gap-3">
-          <NavLink to="/" className={navLinkClassName} end>
-            Coach
-          </NavLink>
           <NavLink to="/stack" className={navLinkClassName}>
             Stack
+          </NavLink>
+          <NavLink to="/coach-debug" className={navLinkClassName}>
+            Debug
           </NavLink>
         </nav>
       </header>
 
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={<CoachPage />} />
           <Route path="/stack" element={<StackPage />} />
+          <Route path="/coach-debug" element={<CoachPage />} />
         </Routes>
       </main>
     </div>
