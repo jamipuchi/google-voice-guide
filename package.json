@@ -5,7 +5,7 @@
   "scripts": {
     "adk:sync": "uv sync --project apps/adk",
     "adk:dev": "uv run --project apps/adk uvicorn app.main:app --reload --host 0.0.0.0 --port 8001",
-    "dev": "pnpm --filter @google-voice-guide/api-contract build && pnpm adk:sync && concurrently -k -n contract,api,web,adk -c blue,cyan,magenta,green \"pnpm --filter @google-voice-guide/api-contract dev\" \"pnpm --filter @google-voice-guide/api dev\" \"pnpm --filter @google-voice-guide/web dev\" \"pnpm adk:dev\"",
+    "dev": "pnpm adk:sync && concurrently -k -n web,adk -c magenta,green \"pnpm --filter @google-voice-guide/web dev\" \"pnpm adk:dev\"",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck"
   },

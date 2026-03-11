@@ -2,10 +2,8 @@
 
 pnpm monorepo with:
 
-- `apps/web`: React + Vite + React Router + Tailwind + tRPC client
-- `apps/api`: Node + Express + tRPC server
+- `apps/web`: React + Vite + React Router + Tailwind
 - `apps/adk`: Python + FastAPI + Google ADK live voice coach
-- `packages/api-contract`: shared tRPC router and types
 
 ## Requirements
 
@@ -21,7 +19,6 @@ pnpm dev
 ```
 
 Frontend runs on `http://localhost:5173`.
-API runs on `http://localhost:3001`.
 ADK voice coach runs on `http://localhost:8001`.
 
 ## Scripts
@@ -38,10 +35,7 @@ pnpm adk:sync
 ```text
 apps/
   adk/
-  api/
   web/
-packages/
-  api-contract/
 ```
 
 ## Live Coaching Test Flow

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { trpc } from '../main';
 
 type TranscriptEntry = {
   id: string;
@@ -131,8 +130,6 @@ function SectionHeader({
 }
 
 export default function CoachPage() {
-  const healthQuery = trpc.health.useQuery();
-
   const [context, setContext] = useState(defaultContext);
   const [devices, setDevices] = useState<DeviceOption[]>([]);
   const [deviceSelections, setDeviceSelections] = useState<DeviceSelections>({
@@ -150,6 +147,9 @@ export default function CoachPage() {
     counterpart: []
   });
   const [coachTranscript, setCoachTranscript] = useState<TranscriptEntry[]>([]);
+  const [adkHealth, setAdkHealth] = useState<'loading' | 'ok' | 'offline'>(
+    'loading'
+  );
   const [transcriberModel, setTranscriberModel] = useState('');
   const [coachModel, setCoachModel] = useState('');
 
@@ -439,6 +439,49 @@ export default function CoachPage() {
   }
 
   useEffect(() => {
+    let isCancelled = false;
+
+    async function loadAdkHealth() {
+      const configuredUrl = import.meta.env.VITE_ADK_HTTP_URL;
+      const baseUrl = configuredUrl || 'http://localhost:8001';
+
+      try {
+        const response = await fetch(`${baseUrl}/health`);
+        if (!response.ok) {
+          throw new Error('ADK health request failed.');
+        }
+
+        const payload = (await response.json()) as {
+          transcriberModel?: string;
+          coachModel?: string;
+        };
+
+        if (isCancelled) {
+          return;
+        }
+
+        setAdkHealth('ok');
+        if (payload.transcriberModel) {
+          setTranscriberModel(payload.transcriberModel);
+        }
+        if (payload.coachModel) {
+          setCoachModel(payload.coachModel);
+        }
+      } catch {
+        if (!isCancelled) {
+          setAdkHealth('offline');
+        }
+      }
+    }
+
+    void loadAdkHealth();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     return () => {
       void stopSession('stopped');
     };
@@ -463,10 +506,10 @@ export default function CoachPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <div className="rounded-2xl bg-white/10 p-5">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gold">
-              Node API
+              ADK service
             </p>
             <p className="mt-2 text-lg font-bold text-white">
-              {healthQuery.data?.status ?? 'loading'}
+              {adkHealth}
             </p>
           </div>
           <div className="rounded-2xl bg-white/10 p-5">

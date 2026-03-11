@@ -3,10 +3,8 @@ const stack = [
   'React + Vite',
   'React Router',
   'Tailwind CSS',
-  'Node + Express',
   'Python + FastAPI',
   'Google ADK',
-  'tRPC',
   'TypeScript'
 ];
 
@@ -34,10 +32,10 @@ export default function StackPage() {
           Ready for feature work.
         </h2>
         <p className="mt-4 max-w-xl text-base leading-7 text-white/80">
-          The repo is split between the web UI, the Node API, and a Python ADK
-          live-streaming service. The browser captures two isolated audio
-          channels, the ADK service transcribes each speaker independently, and
-          the coach reacts to the labeled transcript stream in real time.
+          The repo is split between the web UI and a Python ADK live-streaming
+          service. The browser captures two isolated audio channels, the ADK
+          service transcribes each speaker independently, and the coach reacts
+          to the labeled transcript stream in real time.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <div className="rounded-2xl bg-white/10 p-5">
@@ -54,8 +52,8 @@ export default function StackPage() {
               Agent runtime
             </p>
             <p className="mt-2 text-sm leading-6 text-white/80">
-              FastAPI hosts the ADK bidi stream while the Node API remains
-              available for app-side APIs and future integrations.
+              FastAPI hosts the ADK bidi stream and all of the live backend
+              behavior needed for the coaching flow.
             </p>
           </div>
         </div>
