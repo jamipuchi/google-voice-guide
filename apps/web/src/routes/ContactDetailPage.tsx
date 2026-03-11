@@ -37,12 +37,13 @@ import {
 import * as SubframeCore from "@subframe/core";
 
 import { useLiveCoach } from "@/hooks/useLiveCoach";
+import type { ContactFields } from "@/hooks/useLiveCoach";
 import { useCallTimer } from "@/hooks/useCallTimer";
 import { useInterleavedTranscripts } from "@/hooks/useInterleavedTranscripts";
 import SessionSetupDialog from "@/components/SessionSetupDialog";
+import EditableField from "@/components/EditableField";
 
 export default function ContactDetailPage() {
-  const [notes, setNotes] = useState("");
   const [setupOpen, setSetupOpen] = useState(false);
 
   const coach = useLiveCoach();
@@ -51,10 +52,11 @@ export default function ContactDetailPage() {
     coach.speakerTranscripts,
     coach.speakerLabels
   );
+  const fields = coach.contactFields;
+  const aiFields = coach.aiUpdatedFields;
 
   const transcriptEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll transcript
   useEffect(() => {
     transcriptEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [interleaved]);
@@ -62,6 +64,14 @@ export default function ContactDetailPage() {
   function handleStartSession() {
     setSetupOpen(false);
     void coach.startSession();
+  }
+
+  function f(key: keyof ContactFields) {
+    return {
+      value: fields[key],
+      onChange: (v: string) => coach.updateField(key, v),
+      animateChanges: aiFields.has(key),
+    };
   }
 
   return (
@@ -134,7 +144,7 @@ export default function ContactDetailPage() {
       {/* Body */}
       <div className="flex w-full grow shrink-0 basis-0 items-start gap-6 overflow-hidden mobile:flex-col mobile:flex-nowrap mobile:gap-6">
         {/* Left column */}
-        <div className="flex flex-col items-start gap-6 px-6 py-6 w-1/2 overflow-auto mobile:h-auto mobile:w-full mobile:flex-none mobile:px-4 mobile:py-4">
+        <div className="flex h-full flex-col items-start gap-6 px-6 py-6 w-1/2 overflow-auto mobile:h-auto mobile:w-full mobile:flex-none mobile:px-4 mobile:py-4">
           {/* Contact info card */}
           <div className="flex w-full flex-col items-start gap-6 rounded-lg border border-solid border-neutral-border bg-default-background px-6 py-6 shadow-sm mobile:px-4 mobile:py-4">
             <div className="flex w-full items-center gap-2">
@@ -153,14 +163,16 @@ export default function ContactDetailPage() {
                 size="x-large"
                 image="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face"
               >
-                DS
+                {fields.name.slice(0, 2).toUpperCase()}
               </Avatar>
               <div className="flex grow shrink-0 basis-0 flex-col items-start gap-1">
                 <div className="flex items-center gap-2">
                   <span className="text-heading-2 font-heading-2 text-default-font">
-                    Dácil - Suegra
+                    <EditableField
+                      {...f("name")}
+                      inputClassName="text-heading-2 font-heading-2"
+                    />
                   </span>
-                  <IconButton size="small" icon={<FeatherEdit2 />} />
                 </div>
                 <span className="text-caption font-caption text-subtext-color">
                   Contacto principal
@@ -176,7 +188,10 @@ export default function ContactDetailPage() {
                   </span>
                 </div>
                 <span className="text-body-bold font-body-bold text-default-font">
-                  +34 616 32 12 90
+                  <EditableField
+                    {...f("phone")}
+                    inputClassName="text-body-bold font-body-bold"
+                  />
                 </span>
               </div>
               <div className="flex min-w-[192px] grow shrink-0 basis-0 flex-col items-start gap-1">
@@ -187,7 +202,10 @@ export default function ContactDetailPage() {
                   </span>
                 </div>
                 <span className="text-body-bold font-body-bold text-default-font">
-                  --
+                  <EditableField
+                    {...f("email")}
+                    inputClassName="text-body-bold font-body-bold"
+                  />
                 </span>
               </div>
               <div className="flex min-w-[192px] grow shrink-0 basis-0 flex-col items-start gap-1">
@@ -198,7 +216,10 @@ export default function ContactDetailPage() {
                   </span>
                 </div>
                 <span className="text-body-bold font-body-bold text-default-font">
-                  España
+                  <EditableField
+                    {...f("location")}
+                    inputClassName="text-body-bold font-body-bold"
+                  />
                 </span>
               </div>
             </div>
@@ -209,8 +230,8 @@ export default function ContactDetailPage() {
               <TextArea className="h-auto w-full flex-none" label="" helpText="">
                 <TextArea.Input
                   placeholder="Añadir notas sobre este contacto..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  value={fields.notes}
+                  onChange={(e) => coach.updateField("notes", e.target.value)}
                 />
               </TextArea>
             </div>
@@ -230,7 +251,10 @@ export default function ContactDetailPage() {
                 </span>
               </div>
               <Badge variant="brand" icon={<FeatherCalendar />}>
-                Presupuesto enviado
+                <EditableField
+                  {...f("dealStage")}
+                  inputClassName="text-caption font-caption"
+                />
               </Badge>
             </div>
             <div className="flex h-px w-full flex-none flex-col items-center gap-2 bg-neutral-200" />
@@ -240,21 +264,31 @@ export default function ContactDetailPage() {
                   TIPO DE SERVICIO
                 </span>
                 <span className="text-heading-3 font-heading-3 text-default-font">
-                  Pre necesidad
+                  <EditableField
+                    {...f("serviceType")}
+                    inputClassName="text-heading-3 font-heading-3"
+                  />
                 </span>
               </div>
               <div className="flex min-w-[192px] grow shrink-0 basis-0 flex-col items-start gap-4 rounded-md bg-neutral-50 px-4 py-4">
                 <span className="text-caption-bold font-caption-bold text-subtext-color">
                   PAQUETE
                 </span>
-                <Badge variant="warning">Premium</Badge>
+                <EditableField
+                  {...f("package")}
+                  className="text-caption font-caption"
+                  inputClassName="text-caption font-caption"
+                />
               </div>
               <div className="flex min-w-[192px] grow shrink-0 basis-0 flex-col items-start gap-4 rounded-md bg-neutral-50 px-4 py-4">
                 <span className="text-caption-bold font-caption-bold text-subtext-color">
                   PIPELINE
                 </span>
                 <span className="text-heading-3 font-heading-3 text-default-font">
-                  LucIA
+                  <EditableField
+                    {...f("pipeline")}
+                    inputClassName="text-heading-3 font-heading-3"
+                  />
                 </span>
               </div>
             </div>
@@ -271,7 +305,10 @@ export default function ContactDetailPage() {
                     </span>
                   </div>
                   <span className="text-body-bold font-body-bold text-default-font">
-                    493183264963
+                    <EditableField
+                      {...f("registryId")}
+                      inputClassName="text-body-bold font-body-bold text-right"
+                    />
                   </span>
                 </div>
                 <div className="flex w-full items-center justify-between rounded-md border border-solid border-neutral-border bg-default-background px-4 py-3">
@@ -282,7 +319,10 @@ export default function ContactDetailPage() {
                     </span>
                   </div>
                   <span className="text-body-bold font-body-bold text-default-font">
-                    Jordi V.
+                    <EditableField
+                      {...f("dealOwner")}
+                      inputClassName="text-body-bold font-body-bold text-right"
+                    />
                   </span>
                 </div>
                 <div className="flex w-full items-center justify-between rounded-md border border-solid border-neutral-border bg-default-background px-4 py-3">
@@ -293,7 +333,10 @@ export default function ContactDetailPage() {
                     </span>
                   </div>
                   <span className="text-body-bold font-body-bold text-default-font">
-                    Dácil
+                    <EditableField
+                      {...f("contractorName")}
+                      inputClassName="text-body-bold font-body-bold text-right"
+                    />
                   </span>
                 </div>
               </div>
@@ -309,7 +352,10 @@ export default function ContactDetailPage() {
                 </span>
               </div>
               <span className="text-heading-1 font-heading-1 text-brand-700">
-                € 3.600,00
+                <EditableField
+                  {...f("dealValue")}
+                  inputClassName="text-heading-1 font-heading-1 text-brand-700 text-right"
+                />
               </span>
             </div>
             <div className="flex w-full flex-wrap items-center justify-between mobile:flex-col mobile:flex-nowrap mobile:justify-between">
@@ -341,8 +387,8 @@ export default function ContactDetailPage() {
         </div>
 
         {/* Right column */}
-        <div className="flex flex-col items-start gap-6 border-l border-solid border-neutral-border bg-default-background px-6 py-6 w-1/2 overflow-auto mobile:h-auto mobile:flex-none mobile:px-4 mobile:py-4 mobile:w-1/2 mobile:overflow-auto mobile:border-l-0 mobile:border-t">
-          {/* Live call banner — conditional */}
+        <div className="flex h-full flex-col items-start gap-6 border-l border-solid border-neutral-border bg-default-background px-6 py-6 w-1/2 overflow-auto mobile:h-auto mobile:flex-none mobile:px-4 mobile:py-4 mobile:w-1/2 mobile:overflow-auto mobile:border-l-0 mobile:border-t">
+          {/* Live call banner */}
           {coach.isLive && (
             <div className="flex w-full items-center justify-between rounded-lg border border-solid border-error-100 bg-error-50 px-4 py-3">
               <div className="flex items-center gap-2">
@@ -357,7 +403,7 @@ export default function ContactDetailPage() {
             </div>
           )}
 
-          {/* Status / error messages when not idle */}
+          {/* Status / error messages */}
           {coach.connectionStatus !== "idle" &&
             coach.connectionStatus !== "live" && (
               <div className="flex w-full items-center gap-2 rounded-lg border border-solid border-neutral-border bg-neutral-50 px-4 py-3">

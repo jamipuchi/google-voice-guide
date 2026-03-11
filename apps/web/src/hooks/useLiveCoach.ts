@@ -75,8 +75,41 @@ function bytesToBase64(bytes: Uint8Array) {
   return btoa(binary);
 }
 
+export type ContactFields = {
+  name: string;
+  phone: string;
+  email: string;
+  location: string;
+  notes: string;
+  serviceType: string;
+  package: string;
+  pipeline: string;
+  registryId: string;
+  dealOwner: string;
+  contractorName: string;
+  dealValue: string;
+  dealStage: string;
+};
+
+export const defaultContactFields: ContactFields = {
+  name: 'Dácil - Suegra',
+  phone: '+34 616 32 12 90',
+  email: '--',
+  location: 'España',
+  notes: '',
+  serviceType: 'Pre necesidad',
+  package: 'Premium',
+  pipeline: 'LucIA',
+  registryId: '493183264963',
+  dealOwner: 'Jordi V.',
+  contractorName: 'Dácil',
+  dealValue: '€ 3.600,00',
+  dealStage: 'Presupuesto enviado',
+};
+
 export type UseLiveCoachOptions = {
   initialContext?: Partial<LiveCoachContext>;
+  initialFields?: Partial<ContactFields>;
 };
 
 export function useLiveCoach(options?: UseLiveCoachOptions) {
@@ -102,6 +135,12 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
   const [adkHealth, setAdkHealth] = useState<'loading' | 'ok' | 'offline'>('loading');
   const [transcriberModel, setTranscriberModel] = useState('');
   const [coachModel, setCoachModel] = useState('');
+  const [contactFields, setContactFields] = useState<ContactFields>({
+    ...defaultContactFields,
+    ...options?.initialFields,
+  });
+  // Tracks which fields were recently updated by the AI (for animation)
+  const [aiUpdatedFields, setAiUpdatedFields] = useState<Set<keyof ContactFields>>(new Set());
 
   const websocketRef = useRef<WebSocket | null>(null);
   const capturesRef = useRef<AudioCaptureMap>({ ourUser: null, counterpart: null });
@@ -262,6 +301,7 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
           message?: string;
           transcriberModel?: string;
           coachModel?: string;
+          fields?: Partial<ContactFields>;
         };
 
         if (payload.transcriberModel) setTranscriberModel(payload.transcriberModel);
@@ -269,6 +309,15 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
 
         if (payload.type === 'connected' || payload.type === 'ready') {
           setStatusMessage(payload.message ?? 'Connected.');
+          return;
+        }
+
+        if (payload.type === 'field_update' && payload.fields) {
+          const updatedKeys = Object.keys(payload.fields) as (keyof ContactFields)[];
+          setContactFields((prev) => ({ ...prev, ...payload.fields }));
+          setAiUpdatedFields(new Set(updatedKeys));
+          // Clear the AI-updated tracking after animation completes
+          setTimeout(() => setAiUpdatedFields(new Set()), 2000);
           return;
         }
 
@@ -369,6 +418,10 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
     return () => { void stopSession('stopped'); };
   }, []);
 
+  function updateField(field: keyof ContactFields, value: string) {
+    setContactFields((prev) => ({ ...prev, [field]: value }));
+  }
+
   return {
     // State
     context,
@@ -386,10 +439,13 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
     coachModel,
     speakerLabels,
     isLive: connectionStatus === 'live',
+    contactFields,
+    aiUpdatedFields,
 
     // Actions
     startSession,
     stopSession,
     loadAudioDevices,
+    updateField,
   };
 }
