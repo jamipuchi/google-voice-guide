@@ -17,26 +17,34 @@ fi
 
 free_port() {
   local port="$1"
-  local pids
+  local pids=()
+  local pid
 
-  pids="$(lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null || true)"
-  if [[ -z "$pids" ]]; then
+  while IFS= read -r pid; do
+    [[ -n "$pid" ]] && pids+=("$pid")
+  done < <(lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null || true)
+
+  if [[ "${#pids[@]}" -eq 0 ]]; then
     return
   fi
 
-  echo "Stopping process(es) on port $port: $pids"
-  kill $pids 2>/dev/null || true
+  echo "Stopping process(es) on port $port: ${pids[*]}"
+  kill "${pids[@]}" 2>/dev/null || true
 
   for _ in {1..20}; do
     sleep 0.2
-    pids="$(lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null || true)"
-    if [[ -z "$pids" ]]; then
+    pids=()
+    while IFS= read -r pid; do
+      [[ -n "$pid" ]] && pids+=("$pid")
+    done < <(lsof -tiTCP:"$port" -sTCP:LISTEN 2>/dev/null || true)
+
+    if [[ "${#pids[@]}" -eq 0 ]]; then
       return
     fi
   done
 
-  echo "Force killing process(es) on port $port: $pids"
-  kill -9 $pids 2>/dev/null || true
+  echo "Force killing process(es) on port $port: ${pids[*]}"
+  kill -9 "${pids[@]}" 2>/dev/null || true
 }
 
 free_port 5173
@@ -50,7 +58,9 @@ echo "Web: http://localhost:5173"
 echo "ADK: http://localhost:8001"
 
 pnpm exec concurrently \
-  -k \
+  --kill-others-on-fail \
+  --restart-tries 5 \
+  --restart-after 1500 \
   -n web,adk \
   -c magenta,green \
   "pnpm --filter @google-voice-guide/web dev" \
