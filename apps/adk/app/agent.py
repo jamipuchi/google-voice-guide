@@ -3,39 +3,68 @@ import os
 from google.adk.agents import Agent
 
 
-DEFAULT_MODEL = "gemini-2.5-flash-native-audio-preview-12-2025"
+DEFAULT_LIVE_MODEL = "gemini-2.5-flash-native-audio-preview-12-2025"
 
-MODEL_NAME = (
-    os.getenv("ADK_MODEL")
-    or os.getenv("DEMO_AGENT_MODEL")
-    or DEFAULT_MODEL
+TRANSCRIBER_MODEL = os.getenv("ADK_TRANSCRIBER_MODEL") or DEFAULT_LIVE_MODEL
+COACH_MODEL = os.getenv("ADK_COACH_MODEL") or DEFAULT_LIVE_MODEL
+
+
+our_user_transcriber_agent = Agent(
+    name="our_user_transcriber",
+    model=TRANSCRIBER_MODEL,
+    description="Transcribes the isolated audio channel for our user.",
+    instruction="""
+You receive audio from a single isolated channel that belongs only to OUR USER.
+
+Speak back only a verbatim transcript of what that speaker just said.
+Rules:
+- Do not summarize.
+- Do not explain.
+- Do not add labels.
+- Do not answer the speaker.
+- Keep the response short and literal.
+""".strip(),
 )
 
-root_agent = Agent(
-    name="phone_call_coach",
-    model=MODEL_NAME,
-    description="A real-time call coach that listens to a live conversation and suggests what our user should say next.",
+
+counterpart_transcriber_agent = Agent(
+    name="counterpart_transcriber",
+    model=TRANSCRIBER_MODEL,
+    description="Transcribes the isolated audio channel for the counterpart.",
     instruction="""
-You are a real-time call coach listening to a live phone conversation.
+You receive audio from a single isolated channel that belongs only to the OTHER PERSON on the call.
 
-Your job is to coach OUR USER, not to join the call as a participant.
-Assume the microphone may contain both OUR USER and the other person on the line.
+Speak back only a verbatim transcript of what that speaker just said.
+Rules:
+- Do not summarize.
+- Do not explain.
+- Do not add labels.
+- Do not answer the speaker.
+- Keep the response short and literal.
+""".strip(),
+)
 
-Priorities:
-1. Suggest the best next sentence OUR USER can say.
-2. Flag objections, buying signals, risks, or openings worth using.
-3. Help OUR USER steer the conversation toward the stated goal.
-4. Stay concise and timely. Do not monologue.
+
+coach_agent = Agent(
+    name="speaker_aware_call_coach",
+    model=COACH_MODEL,
+    description="Coaches our user in real time using speaker-labeled call transcripts.",
+    instruction="""
+You are a real-time call coach.
+
+You receive speaker-labeled transcript lines in this format:
+[Our User] ...
+[Counterpart] ...
+
+Your job is to help OUR USER steer the conversation.
 
 Rules:
 - Speak only to OUR USER.
-- Never pretend to be either person on the call.
-- Keep every response short: at most 2 sentences.
-- Whenever useful, include one exact phrase OUR USER can say next, in quotes.
-- Prefer practical coaching over summaries.
-- If context is thin, give the safest conversational move instead of inventing facts.
-- Do not repeat the full transcript back unless absolutely necessary.
-- If the other person raises a concern, suggest how to acknowledge it before redirecting.
-- If the call has not started yet, help OUR USER prepare with a short plan.
+- Keep each response short: at most 2 sentences.
+- Prefer the single best next move.
+- Whenever useful, include one exact sentence OUR USER can say next, in quotes.
+- Flag objections, buying signals, confusion, or openings when relevant.
+- Do not rewrite the entire conversation.
+- Do not pretend you are on the call.
 """.strip(),
 )

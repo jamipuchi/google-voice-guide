@@ -35,8 +35,9 @@ export default function StackPage() {
         </h2>
         <p className="mt-4 max-w-xl text-base leading-7 text-white/80">
           The repo is split between the web UI, the Node API, and a Python ADK
-          live-streaming service. The browser captures audio, the ADK service
-          transcribes and coaches, and the UI renders both streams in real time.
+          live-streaming service. The browser captures two isolated audio
+          channels, the ADK service transcribes each speaker independently, and
+          the coach reacts to the labeled transcript stream in real time.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <div className="rounded-2xl bg-white/10 p-5">

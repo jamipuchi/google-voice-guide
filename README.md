@@ -47,7 +47,9 @@ packages/
 ## Live Coaching Test Flow
 
 1. Put the phone call on speaker, or route both call participants into the same input device.
-2. Open `http://localhost:5173`.
-3. Fill in the conversation goal and context.
-4. Choose the audio input device and start listening.
-5. Watch the live call transcript and the coach suggestions update in real time.
+2. Expose each participant as a separate browser audio input.
+3. Open `http://localhost:5173`.
+4. Fill in the conversation goal and context.
+5. Assign one input to your user and one input to the counterpart.
+6. Start the two-channel coach.
+7. Watch each transcript column and the coach suggestions update in real time.
