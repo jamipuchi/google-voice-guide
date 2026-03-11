@@ -14,3 +14,9 @@ coverage
 
 .idea
 .vscode
+
+.venv
+__pycache__
+.ruff_cache
+.playwright-cli
+output

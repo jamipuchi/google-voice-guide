@@ -4,6 +4,8 @@ const stack = [
   'React Router',
   'Tailwind CSS',
   'Node + Express',
+  'Python + FastAPI',
+  'Google ADK',
   'tRPC',
   'TypeScript'
 ];
@@ -32,9 +34,9 @@ export default function StackPage() {
           Ready for feature work.
         </h2>
         <p className="mt-4 max-w-xl text-base leading-7 text-white/80">
-          The repo is split into app and package workspaces, with a dedicated
-          contract package for the router. That keeps cross-package imports
-          deliberate and makes build order predictable.
+          The repo is split between the web UI, the Node API, and a Python ADK
+          live-streaming service. The browser captures audio, the ADK service
+          transcribes and coaches, and the UI renders both streams in real time.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <div className="rounded-2xl bg-white/10 p-5">
@@ -42,17 +44,17 @@ export default function StackPage() {
               Frontend
             </p>
             <p className="mt-2 text-sm leading-6 text-white/80">
-              React Router is already mounted, Tailwind is configured, and tRPC
-              is connected through React Query.
+              React Router and Tailwind drive the live testing UI, and the app
+              streams microphone audio to the ADK websocket.
             </p>
           </div>
           <div className="rounded-2xl bg-white/10 p-5">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gold">
-              Backend
+              Agent runtime
             </p>
             <p className="mt-2 text-sm leading-6 text-white/80">
-              Express serves the tRPC endpoint and a basic health route, with
-              the shared router package providing type-safe procedures.
+              FastAPI hosts the ADK bidi stream while the Node API remains
+              available for app-side APIs and future integrations.
             </p>
           </div>
         </div>

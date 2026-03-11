@@ -1,5 +1,5 @@
 import { NavLink, Route, Routes } from 'react-router-dom';
-import HomePage from './routes/HomePage';
+import CoachPage from './routes/CoachPage';
 import StackPage from './routes/StackPage';
 
 const navLinkClassName = ({ isActive }: { isActive: boolean }) =>
@@ -14,15 +14,15 @@ export default function App() {
       <header className="mb-8 flex flex-col gap-6 rounded-[2rem] border border-black/5 bg-white/60 p-6 shadow-panel backdrop-blur md:flex-row md:items-center md:justify-between">
         <div className="max-w-2xl">
           <p className="mb-2 text-sm font-semibold uppercase tracking-[0.28em] text-teal">
-            Monorepo Starter
+            Real-Time Call Copilot
           </p>
           <h1 className="text-4xl font-black tracking-tight text-ink sm:text-5xl">
-            React, Node, tRPC, Tailwind, and TypeScript wired together.
+            Live voice coaching with React, Node, Tailwind, and Google ADK.
           </h1>
         </div>
         <nav className="flex flex-wrap gap-3">
           <NavLink to="/" className={navLinkClassName} end>
-            Home
+            Coach
           </NavLink>
           <NavLink to="/stack" className={navLinkClassName}>
             Stack
@@ -32,7 +32,7 @@ export default function App() {
 
       <main className="flex-1">
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<CoachPage />} />
           <Route path="/stack" element={<StackPage />} />
         </Routes>
       </main>
