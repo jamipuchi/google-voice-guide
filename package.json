@@ -5,7 +5,7 @@
   "scripts": {
     "adk:sync": "uv sync --project apps/adk",
     "adk:dev": "uv run --project apps/adk uvicorn app.main:app --reload --host 0.0.0.0 --port 8001",
-    "dev": "pnpm adk:sync && concurrently -k -n web,adk -c magenta,green \"pnpm --filter @google-voice-guide/web dev\" \"pnpm adk:dev\"",
+    "dev": "./scripts/dev.sh",
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck"
   },
