@@ -1,0 +1,18 @@
+{
+  "name": "google-voice-guide",
+  "private": true,
+  "packageManager": "pnpm@10.6.3",
+  "scripts": {
+    "dev": "pnpm --filter @google-voice-guide/api-contract build && pnpm --parallel --filter @google-voice-guide/api-contract --filter @google-voice-guide/api --filter @google-voice-guide/web dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  }
+}
