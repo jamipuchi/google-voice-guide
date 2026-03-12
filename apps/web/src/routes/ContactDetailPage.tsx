@@ -33,6 +33,7 @@ import {
   FeatherTrash,
   FeatherUser,
   FeatherUsers,
+  FeatherZap,
 } from "@subframe/core";
 import * as SubframeCore from "@subframe/core";
 
@@ -54,6 +55,7 @@ export default function ContactDetailPage() {
   );
   const fields = coach.contactFields;
   const aiFields = coach.aiUpdatedFields;
+  const aiActions = coach.aiActions;
 
   const transcriptEndRef = useRef<HTMLDivElement>(null);
 
@@ -419,6 +421,53 @@ export default function ContactDetailPage() {
               <span className="text-caption font-caption text-error-700">
                 {coach.errorMessage}
               </span>
+            </div>
+          )}
+
+          {/* AI Actions log */}
+          {aiActions.length > 0 && (
+            <div className="flex w-full flex-col items-start gap-3 rounded-lg border border-solid border-brand-200 bg-brand-50 px-4 py-4">
+              <div className="flex w-full items-center gap-2">
+                <IconWithBackground
+                  variant="brand"
+                  size="small"
+                  icon={<FeatherZap />}
+                />
+                <span className="text-body-bold font-body-bold text-default-font">
+                  Acciones del agente
+                </span>
+                <span className="ml-auto text-caption font-caption text-subtext-color">
+                  {aiActions.length} actualización{aiActions.length !== 1 ? "es" : ""}
+                </span>
+              </div>
+              <div className="flex h-px w-full bg-brand-200" />
+              <div className="flex w-full flex-col gap-2">
+                {aiActions.map((action) => (
+                  <div
+                    key={action.id}
+                    className="flex w-full items-start gap-2 rounded-md bg-default-background px-3 py-2"
+                  >
+                    <FeatherZap className="mt-0.5 flex-none text-caption font-caption text-brand-600" />
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-caption-bold font-caption-bold text-brand-700">
+                        update_contact_field
+                      </span>
+                      <span className="text-caption font-caption text-subtext-color">
+                        {Object.entries(action.fields)
+                          .map(([k, v]) => `${k}: "${v}"`)
+                          .join(" · ")}
+                      </span>
+                    </div>
+                    <span className="ml-auto text-caption font-caption text-subtext-color whitespace-nowrap">
+                      {new Date(action.ts).toLocaleTimeString("es-ES", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "mcp__plugin_subframe_subframe__get_page_info"
+      "mcp__plugin_subframe_subframe__get_page_info",
+      "Bash(cd \"/Users/alexespinet/Documents/Projects/Google Event/Repo/google-voice-guide\" && bash scripts/dev.sh)"
     ]
   }
 }

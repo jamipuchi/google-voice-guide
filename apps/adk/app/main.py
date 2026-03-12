@@ -33,6 +33,8 @@ from google.genai import types
 from google.genai.types import Blob, Content, Part
 from starlette.websockets import WebSocketState
 
+from google.adk.agents import Agent
+
 from app.agent import (
     COACH_MODEL,
     TRANSCRIBER_MODEL,
@@ -82,11 +84,37 @@ counterpart_runner = Runner(
     agent=counterpart_transcriber_agent,
     session_service=session_service,
 )
-coach_runner = Runner(
-    app_name=APP_NAME,
-    agent=coach_agent,
-    session_service=session_service,
-)
+
+
+def make_coach_runner(websocket: WebSocket) -> Runner:
+    """Creates a per-connection coach runner with an update_contact_field tool
+    that can push field_update messages directly to the browser."""
+
+    async def update_contact_field(fields: dict) -> str:
+        """Update one or more contact fields detected from the conversation.
+
+        Args:
+            fields: Mapping of field names to their new values. Valid keys:
+                name, phone, email, location, serviceType, package, pipeline,
+                dealOwner, contractorName, dealValue, dealStage.
+        """
+        print(f"[TOOL] update_contact_field called: {fields}", flush=True)
+        ok = await send_json(websocket, {"type": "field_update", "fields": fields})
+        print(f"[TOOL] send_json result: {ok}", flush=True)
+        return "updated"
+
+    agent = Agent(
+        name="speaker_aware_call_coach",
+        model=COACH_MODEL,
+        description=coach_agent.description,
+        tools=[update_contact_field],
+        instruction=coach_agent.instruction,
+    )
+    return Runner(
+        app_name=APP_NAME,
+        agent=agent,
+        session_service=session_service,
+    )
 
 app = FastAPI()
 app.add_middleware(
@@ -162,6 +190,42 @@ async def create_live_session(
         response_modalities=[types.Modality.AUDIO],
         session_resumption=types.SessionResumptionConfig(),
         output_audio_transcription=types.AudioTranscriptionConfig(),
+    )
+    live_request_queue = LiveRequestQueue()
+    live_events = runner.run_live(
+        user_id=user_id,
+        session_id=session.id,
+        live_request_queue=live_request_queue,
+        run_config=run_config,
+    )
+    return LiveSession(
+        live_events=live_events,
+        live_request_queue=live_request_queue,
+    )
+
+
+async def create_text_session(
+    runner: Runner,
+    user_id: str,
+    session_suffix: str,
+) -> LiveSession:
+    """Like create_live_session but uses TEXT modality — required for tool calls."""
+    session_id = f"{APP_NAME}-{session_suffix}-{user_id}"
+    session = await session_service.get_session(
+        app_name=APP_NAME,
+        user_id=user_id,
+        session_id=session_id,
+    )
+    if not session:
+        session = await session_service.create_session(
+            app_name=APP_NAME,
+            user_id=user_id,
+            session_id=session_id,
+        )
+
+    run_config = RunConfig(
+        streaming_mode=StreamingMode.BIDI,
+        response_modalities=[types.Modality.TEXT],
     )
     live_request_queue = LiveRequestQueue()
     live_events = runner.run_live(
@@ -259,17 +323,35 @@ async def coach_to_client(
 ) -> None:
     try:
         async for event in coach_session.live_events:
-            next_buffer = extract_text_delta(event, connection_state.coach_buffer)
-            if next_buffer and next_buffer != connection_state.coach_buffer:
-                connection_state.coach_buffer = next_buffer
-                await send_json(
-                    websocket,
-                    {
-                        "type": "coach_suggestion",
-                        "text": next_buffer,
-                        "finished": False,
-                    },
-                )
+            print(f"[COACH EVENT] turn_complete={event.turn_complete} partial={getattr(event, 'partial', None)} has_content={bool(event.content and event.content.parts)} has_transcription={bool(event.output_transcription and event.output_transcription.text)}", flush=True)
+
+            # Text-mode response: content.parts[].text
+            if event.content and event.content.parts:
+                for part in event.content.parts:
+                    if part.text:
+                        connection_state.coach_buffer += part.text
+                        await send_json(
+                            websocket,
+                            {
+                                "type": "coach_suggestion",
+                                "text": connection_state.coach_buffer,
+                                "finished": False,
+                            },
+                        )
+
+            # Audio-mode fallback: output_transcription
+            if not (event.content and event.content.parts):
+                next_buffer = extract_text_delta(event, connection_state.coach_buffer)
+                if next_buffer and next_buffer != connection_state.coach_buffer:
+                    connection_state.coach_buffer = next_buffer
+                    await send_json(
+                        websocket,
+                        {
+                            "type": "coach_suggestion",
+                            "text": next_buffer,
+                            "finished": False,
+                        },
+                    )
 
             if event.turn_complete:
                 final_text = connection_state.coach_buffer.strip()
@@ -396,7 +478,7 @@ async def live_coach(websocket: WebSocket) -> None:
     our_user_session, counterpart_session, coach_session = await asyncio.gather(
         create_live_session(our_user_runner, user_id, "our-user"),
         create_live_session(counterpart_runner, user_id, "counterpart"),
-        create_live_session(coach_runner, user_id, "coach"),
+        create_text_session(make_coach_runner(websocket), user_id, "coach"),
     )
 
     await send_json(

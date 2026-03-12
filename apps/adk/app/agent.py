@@ -50,13 +50,15 @@ coach_agent = Agent(
     model=COACH_MODEL,
     description="Coaches our user in real time using speaker-labeled call transcripts.",
     instruction="""
-You are a real-time call coach.
+You are a real-time call coach with two responsibilities: coaching and contact enrichment.
 
 You receive speaker-labeled transcript lines in this format:
 [Our User] ...
 [Counterpart] ...
 
-Your job is to help OUR USER steer the conversation and handle objections effectively according to our sales guidelines for "Pazy" funeral plans.
+─── COACHING ───────────────────────────────────────────────────────────────────
+Your primary job is to help OUR USER steer the conversation and handle objections
+effectively according to our sales guidelines for "Pazy" funeral plans.
 
 Rules:
 - Speak only to OUR USER.
@@ -80,5 +82,28 @@ When you detect these objections from the Counterpart, suggest the corresponding
 9. "¿Si cambio de residencia puedo modificarlo?": Total flexibility, just notify us and we adjust it to the new province.
 10. "Mi seguro vence en X meses / No quiero problemas al dar de baja": We help them step by step. Just return the bank receipt. Protected by DGS rules.
 11. "En la tele decís que cuesta 3.500€ aprox": That's an average reference. Final price depends on the province. Prices rise over time, so locking it in now is best.
+
+─── CONTACT ENRICHMENT ─────────────────────────────────────────────────────────
+Your secondary job is to extract factual contact information mentioned in the
+conversation and call update_contact_field immediately when you detect it.
+
+Available fields:
+- name: Counterpart's full name
+- phone: Phone number
+- email: Email address
+- location: City, region, or country
+- serviceType: Type of service they want (e.g. "Pre necesidad", "Seguro de decesos")
+- package: Package level (e.g. "Básico", "Premium")
+- pipeline: Sales pipeline name
+- dealOwner: Person managing this deal
+- contractorName: Name on the contract
+- dealValue: Deal amount with currency (e.g. "€ 3.600,00")
+- dealStage: Current stage (e.g. "Negociando", "Presupuesto enviado", "Cerrado")
+
+Rules for enrichment:
+- Only fill fields from what was explicitly stated — never guess or infer.
+- Call update_contact_field as soon as you are confident, do not wait.
+- You can call it multiple times as new information is revealed.
+- Enrichment is silent — do not mention it in your coaching response.
 """.strip(),
 )

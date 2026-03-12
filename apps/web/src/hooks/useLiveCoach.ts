@@ -94,17 +94,17 @@ export type ContactFields = {
 export const defaultContactFields: ContactFields = {
   name: 'Dácil - Suegra',
   phone: '+34 616 32 12 90',
-  email: '--',
-  location: 'España',
+  email: '',          // to be filled by AI
+  location: '',       // to be filled by AI
   notes: '',
-  serviceType: 'Pre necesidad',
-  package: 'Premium',
+  serviceType: '',    // to be filled by AI
+  package: '',        // to be filled by AI
   pipeline: 'LucIA',
   registryId: '493183264963',
   dealOwner: 'Jordi V.',
   contractorName: 'Dácil',
-  dealValue: '€ 3.600,00',
-  dealStage: 'Presupuesto enviado',
+  dealValue: '',      // to be filled by AI
+  dealStage: '',      // to be filled by AI
 };
 
 export type UseLiveCoachOptions = {
@@ -141,6 +141,8 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
   });
   // Tracks which fields were recently updated by the AI (for animation)
   const [aiUpdatedFields, setAiUpdatedFields] = useState<Set<keyof ContactFields>>(new Set());
+  // Log of AI field update actions for the right panel
+  const [aiActions, setAiActions] = useState<{ id: string; fields: Partial<ContactFields>; ts: number }[]>([]);
 
   const websocketRef = useRef<WebSocket | null>(null);
   const capturesRef = useRef<AudioCaptureMap>({ ourUser: null, counterpart: null });
@@ -316,7 +318,10 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
           const updatedKeys = Object.keys(payload.fields) as (keyof ContactFields)[];
           setContactFields((prev) => ({ ...prev, ...payload.fields }));
           setAiUpdatedFields(new Set(updatedKeys));
-          // Clear the AI-updated tracking after animation completes
+          setAiActions((prev) => [
+            ...prev,
+            { id: crypto.randomUUID(), fields: payload.fields!, ts: Date.now() },
+          ]);
           setTimeout(() => setAiUpdatedFields(new Set()), 2000);
           return;
         }
@@ -441,6 +446,7 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
     isLive: connectionStatus === 'live',
     contactFields,
     aiUpdatedFields,
+    aiActions,
 
     // Actions
     startSession,
