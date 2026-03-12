@@ -77,7 +77,7 @@ export default function ContactDetailPage() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-start bg-neutral-50">
+    <div className="flex h-screen w-full flex-col items-start overflow-hidden bg-neutral-50">
       {/* Header */}
       <div className="sticky top-0 z-20 flex w-full items-center justify-between border-b border-solid border-neutral-border bg-default-background/95 px-6 py-4 backdrop-blur mobile:px-4 mobile:py-4">
         <span className="text-heading-3 font-heading-3 text-default-font">
@@ -144,17 +144,19 @@ export default function ContactDetailPage() {
       </div>
 
       {/* Body */}
-      <div className="relative flex w-full flex-1 items-start gap-6 mobile:flex-col mobile:flex-nowrap mobile:gap-6">
+      <div className="relative flex min-h-0 w-full flex-1 items-start gap-6 overflow-hidden mobile:flex-col mobile:flex-nowrap mobile:gap-6">
         {coach.isLoadingFields && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-sm">
             <div className="flex flex-col items-center gap-3">
               <div className="h-10 w-10 animate-spin rounded-full border-4 border-solid border-brand-primary border-t-transparent" />
-              <span className="text-body-bold font-body-bold text-brand-700">Cargando contacto...</span>
+              <span className="text-body-bold font-body-bold text-brand-700">
+                Cargando contacto...
+              </span>
             </div>
           </div>
         )}
         {/* Left column */}
-        <div className="flex w-1/2 flex-col items-start gap-6 px-6 py-6 mobile:h-auto mobile:w-full mobile:flex-none mobile:px-4 mobile:py-4">
+        <div className="flex min-h-0 w-1/2 flex-col items-start gap-6 overflow-y-auto overscroll-contain px-6 py-6 mobile:w-full mobile:flex-1 mobile:px-4 mobile:py-4">
           {/* Contact info card */}
           <div className="flex w-full flex-col items-start gap-6 rounded-lg border border-solid border-neutral-border bg-default-background px-6 py-6 shadow-sm mobile:px-4 mobile:py-4">
             <div className="flex w-full items-center gap-2">
@@ -397,7 +399,7 @@ export default function ContactDetailPage() {
         </div>
 
         {/* Right column */}
-        <div className="flex w-1/2 flex-col items-start gap-6 border-l border-solid border-neutral-border bg-default-background px-6 py-6 mobile:h-auto mobile:w-full mobile:flex-none mobile:px-4 mobile:py-4 mobile:border-l-0 mobile:border-t">
+        <div className="flex min-h-0 w-1/2 flex-col items-start gap-6 overflow-hidden border-l border-solid border-neutral-border bg-default-background px-6 py-6 mobile:w-full mobile:flex-1 mobile:px-4 mobile:py-4 mobile:border-l-0 mobile:border-t">
           {/* Live call banner — conditional */}
           {coach.isLive && (
             <div className="flex w-full items-center justify-between rounded-lg border border-solid border-error-100 bg-error-50 px-4 py-3">
@@ -434,7 +436,7 @@ export default function ContactDetailPage() {
 
           {/* AI Actions log */}
           {aiActions.length > 0 && (
-            <div className="flex w-full flex-col items-start gap-3 rounded-lg border border-solid border-brand-200 bg-brand-50 px-4 py-4">
+            <div className="flex max-h-48 w-full flex-none flex-col items-start gap-3 rounded-lg border border-solid border-brand-200 bg-brand-50 px-4 py-4">
               <div className="flex w-full items-center gap-2">
                 <IconWithBackground
                   variant="brand"
@@ -449,7 +451,7 @@ export default function ContactDetailPage() {
                 </span>
               </div>
               <div className="flex h-px w-full bg-brand-200" />
-              <div className="flex w-full flex-col gap-2">
+              <div className="flex min-h-0 w-full flex-col gap-2 overflow-auto">
                 {aiActions.map((action) => (
                   <div
                     key={action.id}
@@ -480,7 +482,7 @@ export default function ContactDetailPage() {
           )}
 
           {/* Recommendations panel */}
-          <div className="flex w-full flex-col items-start gap-4 rounded-lg border border-solid border-success-200 bg-success-50 px-6 py-6 shadow-sm">
+          <div className="flex max-h-64 w-full flex-none flex-col items-start gap-4 rounded-lg border border-solid border-success-200 bg-success-50 px-6 py-6 shadow-sm">
             <div className="flex w-full items-center gap-2">
               <IconWithBackground
                 variant="success"
@@ -492,7 +494,7 @@ export default function ContactDetailPage() {
               </span>
             </div>
             <div className="flex h-px w-full flex-none flex-col items-center gap-2 bg-success-200" />
-            <div className="flex w-full flex-col items-start gap-3">
+            <div className="flex min-h-0 w-full flex-col items-start gap-3 overflow-auto">
               {coach.coachTranscript.length === 0 ? (
                 <div className="flex w-full items-start gap-3 rounded-lg bg-default-background px-4 py-3">
                   <IconWithBackground
@@ -534,7 +536,7 @@ export default function ContactDetailPage() {
           </div>
 
           {/* Transcription panel */}
-          <div className="flex w-full flex-col items-start gap-4 rounded-lg border border-solid border-neutral-border bg-default-background px-6 py-6 shadow-sm">
+          <div className="flex min-h-0 w-full flex-1 flex-col items-start gap-4 rounded-lg border border-solid border-neutral-border bg-default-background px-6 py-6 shadow-sm">
             <div className="flex w-full items-center gap-2">
               <IconWithBackground
                 variant="neutral"
@@ -546,7 +548,7 @@ export default function ContactDetailPage() {
               </span>
             </div>
             <div className="flex h-px w-full flex-none flex-col items-center gap-2 bg-neutral-200" />
-            <div className="flex max-h-[384px] w-full flex-col items-start gap-4 overflow-auto">
+            <div className="flex min-h-0 w-full flex-1 flex-col items-start gap-4 overflow-auto">
               {interleaved.length === 0 ? (
                 <div className="flex w-full flex-col items-start gap-2">
                   <div className="flex w-full items-start rounded-lg bg-neutral-50 px-4 py-3">
