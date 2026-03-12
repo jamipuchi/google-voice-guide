@@ -3,10 +3,11 @@ import os
 from google.adk.agents import Agent
 
 
-DEFAULT_LIVE_MODEL = "gemini-2.5-flash-native-audio-preview-12-2025"
+DEFAULT_TRANSCRIBER_MODEL = "gemini-2.5-flash-native-audio-preview-12-2025"
+DEFAULT_COACH_MODEL = "gemini-2.0-flash-live-001"
 
-TRANSCRIBER_MODEL = os.getenv("ADK_TRANSCRIBER_MODEL") or DEFAULT_LIVE_MODEL
-COACH_MODEL = os.getenv("ADK_COACH_MODEL") or DEFAULT_LIVE_MODEL
+TRANSCRIBER_MODEL = os.getenv("ADK_TRANSCRIBER_MODEL") or DEFAULT_TRANSCRIBER_MODEL
+COACH_MODEL = os.getenv("ADK_COACH_MODEL") or DEFAULT_COACH_MODEL
 
 
 our_user_transcriber_agent = Agent(
