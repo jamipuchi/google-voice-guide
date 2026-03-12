@@ -15,7 +15,7 @@ export default function App() {
 
   if (isFullBleed) {
     return (
-      <div className="flex h-screen w-full flex-col">
+      <div className="flex min-h-screen w-full flex-col">
         <Routes>
           <Route path="/" element={<ContactDetailPage />} />
         </Routes>
