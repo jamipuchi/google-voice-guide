@@ -144,7 +144,15 @@ export default function ContactDetailPage() {
       </div>
 
       {/* Body */}
-      <div className="flex w-full flex-1 items-start gap-6 mobile:flex-col mobile:flex-nowrap mobile:gap-6">
+      <div className="relative flex w-full flex-1 items-start gap-6 mobile:flex-col mobile:flex-nowrap mobile:gap-6">
+        {coach.isLoadingFields && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-10 w-10 animate-spin rounded-full border-4 border-solid border-brand-primary border-t-transparent" />
+              <span className="text-body-bold font-body-bold text-brand-700">Cargando contacto...</span>
+            </div>
+          </div>
+        )}
         {/* Left column */}
         <div className="flex w-1/2 flex-col items-start gap-6 px-6 py-6 mobile:h-auto mobile:w-full mobile:flex-none mobile:px-4 mobile:py-4">
           {/* Contact info card */}
@@ -165,7 +173,7 @@ export default function ContactDetailPage() {
                 size="x-large"
                 image="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face"
               >
-                {fields.name.slice(0, 2).toUpperCase()}
+                {fields.name ? fields.name.slice(0, 2).toUpperCase() : '??'}
               </Avatar>
               <div className="flex grow shrink-0 basis-0 flex-col items-start gap-1">
                 <div className="flex items-center gap-2">

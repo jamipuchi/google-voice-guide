@@ -92,27 +92,29 @@ export type ContactFields = {
 };
 
 export const defaultContactFields: ContactFields = {
-  name: 'Dácil - Suegra',
-  phone: '+34 616 32 12 90',
-  email: '',          // to be filled by AI
-  location: '',       // to be filled by AI
+  name: '',
+  phone: '',
+  email: '',
+  location: '',
   notes: '',
-  serviceType: '',    // to be filled by AI
-  package: '',        // to be filled by AI
-  pipeline: 'LucIA',
-  registryId: '493183264963',
-  dealOwner: 'Jordi V.',
-  contractorName: 'Dácil',
-  dealValue: '',      // to be filled by AI
-  dealStage: '',      // to be filled by AI
+  serviceType: '',
+  package: '',
+  pipeline: '',
+  registryId: '',
+  dealOwner: '',
+  contractorName: '',
+  dealValue: '',
+  dealStage: '',
 };
 
 export type UseLiveCoachOptions = {
   initialContext?: Partial<LiveCoachContext>;
   initialFields?: Partial<ContactFields>;
+  clientId?: string;
 };
 
 export function useLiveCoach(options?: UseLiveCoachOptions) {
+  const clientIdRef = useRef<string | undefined>(options?.clientId);
   const [context, setContext] = useState<LiveCoachContext>({
     ...defaultContext,
     ...options?.initialContext,
@@ -135,10 +137,8 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
   const [adkHealth, setAdkHealth] = useState<'loading' | 'ok' | 'offline'>('loading');
   const [transcriberModel, setTranscriberModel] = useState('');
   const [coachModel, setCoachModel] = useState('');
-  const [contactFields, setContactFields] = useState<ContactFields>({
-    ...defaultContactFields,
-    ...options?.initialFields,
-  });
+  const [contactFields, setContactFields] = useState<ContactFields>(defaultContactFields);
+  const [isLoadingFields, setIsLoadingFields] = useState(true);
   // Tracks which fields were recently updated by the AI (for animation)
   const [aiUpdatedFields, setAiUpdatedFields] = useState<Set<keyof ContactFields>>(new Set());
   // Log of AI field update actions for the right panel
@@ -147,6 +147,41 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
   const websocketRef = useRef<WebSocket | null>(null);
   const capturesRef = useRef<AudioCaptureMap>({ ourUser: null, counterpart: null });
   const seqRef = useRef(0);
+
+  // Fetch client data if clientId is provided
+  useEffect(() => {
+    async function fetchClient() {
+      setIsLoadingFields(true);
+      if (!options?.clientId) {
+        // Find the first client if none provided (e.g. Dácil)
+        try {
+          const base = import.meta.env.VITE_ADK_HTTP_URL || 'http://localhost:8001';
+          const listRes = await fetch(`${base}/clients`);
+          const clients = await listRes.json();
+          if (clients.length > 0) {
+            clientIdRef.current = clients[0].id;
+          }
+        } catch (e) {
+          console.error('Failed to list clients', e);
+        }
+      }
+
+      if (clientIdRef.current) {
+        try {
+          const base = import.meta.env.VITE_ADK_HTTP_URL || 'http://localhost:8001';
+          const res = await fetch(`${base}/clients/${clientIdRef.current}`);
+          if (res.ok) {
+            const data = await res.json();
+            setContactFields((prev) => ({ ...prev, ...data }));
+          }
+        } catch (e) {
+          console.error('Failed to fetch client', e);
+        }
+      }
+      setIsLoadingFields(false);
+    }
+    void fetchClient();
+  }, [options?.clientId]);
 
   const speakerLabels: SpeakerLabels = {
     ourUser: context.ourUser || 'Our user',
@@ -316,7 +351,11 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
 
         if (payload.type === 'field_update' && payload.fields) {
           const updatedKeys = Object.keys(payload.fields) as (keyof ContactFields)[];
-          setContactFields((prev) => ({ ...prev, ...payload.fields }));
+          setContactFields((prev) => {
+             const next = { ...prev, ...payload.fields };
+             void persistFields(next);
+             return next;
+          });
           setAiUpdatedFields(new Set(updatedKeys));
           setAiActions((prev) => [
             ...prev,
@@ -423,8 +462,26 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
     return () => { void stopSession('stopped'); };
   }, []);
 
+  async function persistFields(fields: ContactFields) {
+    if (!clientIdRef.current) return;
+    try {
+      const base = import.meta.env.VITE_ADK_HTTP_URL || 'http://localhost:8001';
+      await fetch(`${base}/clients/${clientIdRef.current}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(fields),
+      });
+    } catch (e) {
+      console.error('Failed to persist fields', e);
+    }
+  }
+
   function updateField(field: keyof ContactFields, value: string) {
-    setContactFields((prev) => ({ ...prev, [field]: value }));
+    setContactFields((prev) => {
+      const next = { ...prev, [field]: value };
+      void persistFields(next);
+      return next;
+    });
   }
 
   return {
@@ -445,6 +502,7 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
     speakerLabels,
     isLive: connectionStatus === 'live',
     contactFields,
+    isLoadingFields,
     aiUpdatedFields,
     aiActions,
 

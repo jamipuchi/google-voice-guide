@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 
 
 ROOT_DIR = Path(__file__).resolve().parents[3]
+CLIENTS_DIR = ROOT_DIR / "clients"
+CLIENTS_DIR.mkdir(exist_ok=True)
 load_dotenv(ROOT_DIR / ".env")
 
 if os.getenv("GOOGLE_API_KEY") and os.getenv("GEMINI_API_KEY"):
@@ -467,6 +469,37 @@ async def health() -> dict[str, str]:
         "transcriberModel": TRANSCRIBER_MODEL,
         "coachModel": COACH_MODEL,
     }
+
+
+@app.get("/clients")
+async def list_clients():
+    clients = []
+    for f in CLIENTS_DIR.glob("*.json"):
+        try:
+            with open(f, "r") as j:
+                data = json.load(j)
+                clients.append({"id": f.stem, "name": data.get("name", "Unknown")})
+        except Exception:
+            continue
+    return clients
+
+
+@app.get("/clients/{client_id}")
+async def get_client(client_id: str):
+    file_path = CLIENTS_DIR / f"{client_id}.json"
+    if not file_path.exists():
+        return {"error": "Client not found"}, 404
+    with open(file_path, "r") as f:
+        return json.load(f)
+
+
+@app.post("/clients/{client_id}")
+async def update_client(client_id: str, data: dict):
+    file_path = CLIENTS_DIR / f"{client_id}.json"
+    # Ensure directory exists but we allow creating new files via POST if it's a new UUID
+    with open(file_path, "w") as f:
+        json.dump(data, f, indent=2)
+    return {"status": "ok"}
 
 
 @app.websocket("/ws/live-coach")
