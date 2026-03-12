@@ -113,6 +113,11 @@ export type UseLiveCoachOptions = {
   clientId?: string;
 };
 
+type LoadedAudioDevices = {
+  devices: DeviceOption[];
+  selections: DeviceSelections;
+};
+
 export function useLiveCoach(options?: UseLiveCoachOptions) {
   const clientIdRef = useRef<string | undefined>(options?.clientId);
   const [context, setContext] = useState<LiveCoachContext>({
@@ -317,10 +322,10 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
       setCoachTranscript([]);
       seqRef.current = 0;
 
-      await loadAudioDevices();
+      const loadedAudio = await loadAudioDevices();
 
-      const ourUserDevice = deviceSelections.ourUser;
-      const counterpartDevice = deviceSelections.counterpart;
+      const ourUserDevice = loadedAudio.selections.ourUser;
+      const counterpartDevice = loadedAudio.selections.counterpart;
 
       if (!ourUserDevice || !counterpartDevice) {
         throw new Error('Select one audio input for each participant.');
@@ -421,7 +426,7 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
     }
   }
 
-  async function loadAudioDevices() {
+  async function loadAudioDevices(): Promise<LoadedAudioDevices> {
     const permissionStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     permissionStream.getTracks().forEach((t) => t.stop());
 
@@ -429,11 +434,19 @@ export function useLiveCoach(options?: UseLiveCoachOptions) {
       .filter((d) => d.kind === 'audioinput')
       .map((d, i) => ({ deviceId: d.deviceId, label: d.label || `Input ${i + 1}` }));
 
+    const nextSelections = {
+      ourUser: deviceSelections.ourUser || audioInputs[0]?.deviceId || '',
+      counterpart:
+        deviceSelections.counterpart || audioInputs[1]?.deviceId || audioInputs[0]?.deviceId || '',
+    };
+
     setDevices(audioInputs);
-    setDeviceSelections((current) => ({
-      ourUser: current.ourUser || audioInputs[0]?.deviceId || '',
-      counterpart: current.counterpart || audioInputs[1]?.deviceId || audioInputs[0]?.deviceId || '',
-    }));
+    setDeviceSelections(nextSelections);
+
+    return {
+      devices: audioInputs,
+      selections: nextSelections,
+    };
   }
 
   // ADK health check

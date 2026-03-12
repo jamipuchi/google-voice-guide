@@ -81,7 +81,7 @@ export default function ContactDetailPage() {
       {/* Header */}
       <div className="sticky top-0 z-20 flex w-full items-center justify-between border-b border-solid border-neutral-border bg-default-background/95 px-6 py-4 backdrop-blur mobile:px-4 mobile:py-4">
         <span className="text-heading-3 font-heading-3 text-default-font">
-          Coach en vivo
+          Live coach
         </span>
         <div className="flex items-center gap-2">
           {coach.isLive ? (
@@ -90,7 +90,7 @@ export default function ContactDetailPage() {
               icon={<FeatherPhoneOff />}
               onClick={() => void coach.stopSession("stopped")}
             >
-              Detener
+              Stop
             </Button>
           ) : (
             <Button
@@ -100,8 +100,8 @@ export default function ContactDetailPage() {
               onClick={() => setSetupOpen(true)}
             >
               {coach.connectionStatus === "connecting"
-                ? "Conectando..."
-                : "Iniciar llamada"}
+                ? "Connecting..."
+                : "Start call"}
             </Button>
           )}
           <SubframeCore.DropdownMenu.Root>
@@ -110,7 +110,7 @@ export default function ContactDetailPage() {
                 variant="brand-tertiary"
                 iconRight={<FeatherChevronDown />}
               >
-                Acciones
+                Actions
               </Button>
             </SubframeCore.DropdownMenu.Trigger>
             <SubframeCore.DropdownMenu.Portal>
@@ -125,16 +125,16 @@ export default function ContactDetailPage() {
                     icon={<FeatherSettings />}
                     onClick={() => setSetupOpen(true)}
                   >
-                    Configurar llamada
+                    Configure call
                   </DropdownMenu.DropdownItem>
                   <DropdownMenu.DropdownItem icon={<FeatherEdit2 />}>
-                    Editar
+                    Edit
                   </DropdownMenu.DropdownItem>
                   <DropdownMenu.DropdownItem icon={<FeatherCopy />}>
-                    Duplicar
+                    Duplicate
                   </DropdownMenu.DropdownItem>
                   <DropdownMenu.DropdownItem icon={<FeatherTrash />}>
-                    Eliminar
+                    Delete
                   </DropdownMenu.DropdownItem>
                 </DropdownMenu>
               </SubframeCore.DropdownMenu.Content>
@@ -164,7 +164,7 @@ export default function ContactDetailPage() {
                 icon={<FeatherUser />}
               />
               <span className="text-heading-3 font-heading-3 text-default-font">
-                Información Básica
+                Basic information
               </span>
             </div>
             <div className="flex h-px w-full flex-none flex-col items-center gap-2 bg-neutral-200" />
@@ -185,7 +185,7 @@ export default function ContactDetailPage() {
                   </span>
                 </div>
                 <span className="text-caption font-caption text-subtext-color">
-                  Contacto principal
+                  Primary contact
                 </span>
               </div>
             </div>
@@ -194,7 +194,7 @@ export default function ContactDetailPage() {
                 <div className="flex items-center gap-2">
                   <FeatherPhone className="text-body font-body text-subtext-color" />
                   <span className="text-caption font-caption text-subtext-color">
-                    Número de teléfono
+                    Phone number
                   </span>
                 </div>
                 <span className="text-body-bold font-body-bold text-default-font">
@@ -208,7 +208,7 @@ export default function ContactDetailPage() {
                 <div className="flex items-center gap-2">
                   <FeatherMail className="text-body font-body text-subtext-color" />
                   <span className="text-caption font-caption text-subtext-color">
-                    Correo electrónico
+                    Email
                   </span>
                 </div>
                 <span className="text-body-bold font-body-bold text-default-font">
@@ -222,7 +222,7 @@ export default function ContactDetailPage() {
                 <div className="flex items-center gap-2">
                   <FeatherMapPin className="text-body font-body text-subtext-color" />
                   <span className="text-caption font-caption text-subtext-color">
-                    Ubicación
+                    Location
                   </span>
                 </div>
                 <span className="text-body-bold font-body-bold text-default-font">
@@ -235,11 +235,11 @@ export default function ContactDetailPage() {
             </div>
             <div className="flex w-full flex-col items-start gap-2">
               <span className="text-caption-bold font-caption-bold text-subtext-color">
-                Notas del agente
+                Agent notes
               </span>
               <TextArea className="h-auto w-full flex-none" label="" helpText="">
                 <TextArea.Input
-                  placeholder="Añadir notas sobre este contacto..."
+                  placeholder="Add notes about this contact..."
                   value={fields.notes}
                   onChange={(e) => coach.updateField("notes", e.target.value)}
                 />
@@ -257,7 +257,7 @@ export default function ContactDetailPage() {
                   icon={<FeatherBriefcase />}
                 />
                 <span className="text-heading-3 font-heading-3 text-default-font">
-                  Contexto del Negocio
+                  Business context
                 </span>
               </div>
               <Badge variant="brand" icon={<FeatherCalendar />}>
@@ -271,7 +271,7 @@ export default function ContactDetailPage() {
             <div className="flex w-full flex-wrap items-start gap-6 mobile:flex-col mobile:flex-nowrap mobile:gap-4">
               <div className="flex min-w-[192px] grow shrink-0 basis-0 flex-col items-start gap-4 rounded-md bg-neutral-50 px-4 py-4">
                 <span className="text-caption-bold font-caption-bold text-subtext-color">
-                  TIPO DE SERVICIO
+                  SERVICE TYPE
                 </span>
                 <span className="text-heading-3 font-heading-3 text-default-font">
                   <EditableField
@@ -282,7 +282,7 @@ export default function ContactDetailPage() {
               </div>
               <div className="flex min-w-[192px] grow shrink-0 basis-0 flex-col items-start gap-4 rounded-md bg-neutral-50 px-4 py-4">
                 <span className="text-caption-bold font-caption-bold text-subtext-color">
-                  PAQUETE
+                  PACKAGE
                 </span>
                 <EditableField
                   {...f("package")}
@@ -304,14 +304,14 @@ export default function ContactDetailPage() {
             </div>
             <div className="flex w-full flex-col items-start gap-4">
               <span className="text-body-bold font-body-bold text-default-font">
-                Detalles del negocio
+                Deal details
               </span>
               <div className="flex w-full flex-col items-start gap-3">
                 <div className="flex w-full items-center justify-between rounded-md border border-solid border-neutral-border bg-default-background px-4 py-3">
                   <div className="flex items-center gap-2">
                     <FeatherHash className="text-body font-body text-subtext-color" />
                     <span className="text-body font-body text-subtext-color">
-                      ID de registro
+                      Registry ID
                     </span>
                   </div>
                   <span className="text-body-bold font-body-bold text-default-font">
@@ -325,7 +325,7 @@ export default function ContactDetailPage() {
                   <div className="flex items-center gap-2">
                     <FeatherUser className="text-body font-body text-subtext-color" />
                     <span className="text-body font-body text-subtext-color">
-                      Propietario del negocio
+                      Deal owner
                     </span>
                   </div>
                   <span className="text-body-bold font-body-bold text-default-font">
@@ -339,7 +339,7 @@ export default function ContactDetailPage() {
                   <div className="flex items-center gap-2">
                     <FeatherUsers className="text-body font-body text-subtext-color" />
                     <span className="text-body font-body text-subtext-color">
-                      Nombre del contratante
+                      Contractor name
                     </span>
                   </div>
                   <span className="text-body-bold font-body-bold text-default-font">
@@ -355,10 +355,10 @@ export default function ContactDetailPage() {
             <div className="flex w-full items-center justify-between rounded-lg border-2 border-solid border-brand-200 bg-brand-50 px-6 py-5 mobile:flex-col mobile:flex-nowrap mobile:items-start mobile:justify-start mobile:gap-4">
               <div className="flex flex-col items-start gap-1">
                 <span className="text-caption-bold font-caption-bold text-brand-700">
-                  VALOR DEL NEGOCIO
+                  DEAL VALUE
                 </span>
                 <span className="text-caption font-caption text-brand-600">
-                  Precio total del servicio
+                  Total service price
                 </span>
               </div>
               <span className="text-heading-1 font-heading-1 text-brand-700">
@@ -382,14 +382,14 @@ export default function ContactDetailPage() {
                   className="mobile:grow mobile:shrink-0 mobile:basis-0"
                   variant="neutral-secondary"
                 >
-                  Editar
+                  Edit
                 </Button>
                 <Button
                   className="mobile:grow mobile:shrink-0 mobile:basis-0"
                   variant="brand-primary"
                   icon={<FeatherSend />}
                 >
-                  Enviar propuesta
+                  Send proposal
                 </Button>
               </div>
             </div>
@@ -404,7 +404,7 @@ export default function ContactDetailPage() {
               <div className="flex items-center gap-2">
                 <div className="flex h-3 w-3 flex-none items-start rounded-full bg-error-500 animate-pulse" />
                 <span className="text-body-bold font-body-bold text-error-700">
-                  Llamada en vivo
+                  Live call
                 </span>
               </div>
               <span className="text-monospace-body font-monospace-body text-error-700">
@@ -442,10 +442,10 @@ export default function ContactDetailPage() {
                   icon={<FeatherZap />}
                 />
                 <span className="text-body-bold font-body-bold text-default-font">
-                  Acciones del agente
+                  Agent actions
                 </span>
                 <span className="ml-auto text-caption font-caption text-subtext-color">
-                  {aiActions.length} actualización{aiActions.length !== 1 ? "es" : ""}
+                  {aiActions.length} update{aiActions.length !== 1 ? "s" : ""}
                 </span>
               </div>
               <div className="flex h-px w-full bg-brand-200" />
@@ -467,7 +467,7 @@ export default function ContactDetailPage() {
                       </span>
                     </div>
                     <span className="ml-auto text-caption font-caption text-subtext-color whitespace-nowrap">
-                      {new Date(action.ts).toLocaleTimeString("es-ES", {
+                      {new Date(action.ts).toLocaleTimeString("en-US", {
                         hour: "2-digit",
                         minute: "2-digit",
                         second: "2-digit",
@@ -488,7 +488,7 @@ export default function ContactDetailPage() {
                 icon={<FeatherSparkles />}
               />
               <span className="text-heading-3 font-heading-3 text-default-font">
-                Recomendaciones del asistente
+                Assistant recommendations
               </span>
             </div>
             <div className="flex h-px w-full flex-none flex-col items-center gap-2 bg-success-200" />
@@ -502,12 +502,12 @@ export default function ContactDetailPage() {
                   />
                   <div className="flex flex-col items-start gap-1">
                     <span className="text-body-bold font-body-bold text-default-font">
-                      Sin recomendaciones aún
+                      No recommendations yet
                     </span>
                     <span className="text-caption font-caption text-subtext-color">
                       {coach.isLive
-                        ? "El asistente generará sugerencias conforme avance la conversación."
-                        : "Inicia una llamada para recibir coaching en tiempo real."}
+                        ? "The assistant will generate suggestions as the conversation progresses."
+                        : "Start a call to receive real-time coaching."}
                     </span>
                   </div>
                 </div>
@@ -542,7 +542,7 @@ export default function ContactDetailPage() {
                 icon={<FeatherMessageSquare />}
               />
               <span className="text-heading-3 font-heading-3 text-default-font">
-                Transcripción en tiempo real
+                Real-time transcript
               </span>
             </div>
             <div className="flex h-px w-full flex-none flex-col items-center gap-2 bg-neutral-200" />
@@ -552,8 +552,8 @@ export default function ContactDetailPage() {
                   <div className="flex w-full items-start rounded-lg bg-neutral-50 px-4 py-3">
                     <span className="text-body font-body text-subtext-color">
                       {coach.isLive
-                        ? "Esperando audio..."
-                        : "La transcripción aparecerá aquí cuando inicie la llamada."}
+                        ? "Waiting for audio..."
+                        : "The transcript will appear here once the call starts."}
                     </span>
                   </div>
                 </div>

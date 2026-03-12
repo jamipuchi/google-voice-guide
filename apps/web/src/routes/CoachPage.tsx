@@ -29,6 +29,10 @@ type SpeakerLabels = Record<SpeakerKey, string>;
 type DeviceSelections = Record<SpeakerKey, string>;
 type TranscriptMap = Record<SpeakerKey, TranscriptEntry[]>;
 type AudioCaptureMap = Record<SpeakerKey, AudioCapture | null>;
+type LoadedAudioDevices = {
+  devices: DeviceOption[];
+  selections: DeviceSelections;
+};
 
 const speakers: SpeakerKey[] = ['ourUser', 'counterpart'];
 
@@ -174,7 +178,7 @@ export default function CoachPage() {
     counterpart: context.counterpart || 'Counterpart'
   };
 
-  async function loadAudioDevices() {
+  async function loadAudioDevices(): Promise<LoadedAudioDevices> {
     const permissionStream = await navigator.mediaDevices.getUserMedia({
       audio: true
     });
@@ -187,11 +191,19 @@ export default function CoachPage() {
         label: device.label || `Input ${index + 1}`
       }));
 
+    const nextSelections = {
+      ourUser: deviceSelections.ourUser || audioInputs[0]?.deviceId || '',
+      counterpart:
+        deviceSelections.counterpart || audioInputs[1]?.deviceId || audioInputs[0]?.deviceId || ''
+    };
+
     setDevices(audioInputs);
-    setDeviceSelections((current) => ({
-      ourUser: current.ourUser || audioInputs[0]?.deviceId || '',
-      counterpart: current.counterpart || audioInputs[1]?.deviceId || audioInputs[0]?.deviceId || ''
-    }));
+    setDeviceSelections(nextSelections);
+
+    return {
+      devices: audioInputs,
+      selections: nextSelections
+    };
   }
 
   function flushSpeakerAudio(speaker: SpeakerKey, socket: WebSocket) {
@@ -336,10 +348,10 @@ export default function CoachPage() {
       });
       setCoachTranscript([]);
 
-      await loadAudioDevices();
+      const loadedAudio = await loadAudioDevices();
 
-      const ourUserDevice = deviceSelections.ourUser;
-      const counterpartDevice = deviceSelections.counterpart;
+      const ourUserDevice = loadedAudio.selections.ourUser;
+      const counterpartDevice = loadedAudio.selections.counterpart;
 
       if (!ourUserDevice || !counterpartDevice) {
         throw new Error('Select one audio input for each participant.');

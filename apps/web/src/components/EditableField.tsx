@@ -100,7 +100,7 @@ export default function EditableField({
         setIsEditing(true);
         setLocalValue(value);
       }}
-      title="Haz clic para editar"
+      title="Click to edit"
     >
       {shown || <span className="text-subtext-color">{placeholder}</span>}
       {isTyping && (

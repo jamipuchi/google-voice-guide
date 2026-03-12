@@ -47,8 +47,8 @@ export default function SessionSetupDialog({
   }, [open]);
 
   const speakerLabels: Record<SpeakerKey, string> = {
-    ourUser: context.ourUser || 'Nuestro usuario',
-    counterpart: context.counterpart || 'Contraparte',
+    ourUser: context.ourUser || 'Our user',
+    counterpart: context.counterpart || 'Counterpart',
   };
 
   return (
@@ -60,12 +60,12 @@ export default function SessionSetupDialog({
       <div className="flex flex-col gap-5 px-6 py-6">
         <div className="flex items-center justify-between">
           <span className="text-heading-2 font-heading-2 text-default-font">
-            Configurar llamada
+            Configure call
           </span>
           <Badge
             variant={adkHealth === 'ok' ? 'success' : adkHealth === 'loading' ? 'neutral' : 'error'}
           >
-            {adkHealth === 'ok' ? 'ADK online' : adkHealth === 'loading' ? 'Verificando...' : 'ADK offline'}
+            {adkHealth === 'ok' ? 'ADK online' : adkHealth === 'loading' ? 'Checking...' : 'ADK offline'}
           </Badge>
         </div>
 
@@ -73,7 +73,7 @@ export default function SessionSetupDialog({
 
         <label className="flex flex-col gap-1.5">
           <span className="text-caption-bold font-caption-bold text-subtext-color">
-            Etiqueta nuestro usuario
+            Our user label
           </span>
           <input
             className="rounded-md border border-solid border-neutral-border bg-default-background px-3 py-2 text-body font-body text-default-font outline-none focus:border-brand-primary"
@@ -84,7 +84,7 @@ export default function SessionSetupDialog({
 
         <label className="flex flex-col gap-1.5">
           <span className="text-caption-bold font-caption-bold text-subtext-color">
-            Etiqueta contraparte
+            Counterpart label
           </span>
           <input
             className="rounded-md border border-solid border-neutral-border bg-default-background px-3 py-2 text-body font-body text-default-font outline-none focus:border-brand-primary"
@@ -95,7 +95,7 @@ export default function SessionSetupDialog({
 
         <label className="flex flex-col gap-1.5">
           <span className="text-caption-bold font-caption-bold text-subtext-color">
-            Objetivo de la llamada
+            Call goal
           </span>
           <input
             className="rounded-md border border-solid border-neutral-border bg-default-background px-3 py-2 text-body font-body text-default-font outline-none focus:border-brand-primary"
@@ -106,7 +106,7 @@ export default function SessionSetupDialog({
 
         <label className="flex flex-col gap-1.5">
           <span className="text-caption-bold font-caption-bold text-subtext-color">
-            Contexto adicional
+            Additional context
           </span>
           <textarea
             className="min-h-[80px] rounded-md border border-solid border-neutral-border bg-default-background px-3 py-2 text-body font-body text-default-font outline-none focus:border-brand-primary"
@@ -120,7 +120,7 @@ export default function SessionSetupDialog({
         {speakers.map((speaker) => (
           <label key={speaker} className="flex flex-col gap-1.5">
             <span className="text-caption-bold font-caption-bold text-subtext-color">
-              Micrófono — {speakerLabels[speaker]}
+              Microphone - {speakerLabels[speaker]}
             </span>
             <select
               className="rounded-md border border-solid border-neutral-border bg-default-background px-3 py-2 text-body font-body text-default-font outline-none focus:border-brand-primary"
@@ -128,7 +128,7 @@ export default function SessionSetupDialog({
               onChange={(e) => onDeviceChange(speaker, e.target.value)}
             >
               {devices.length === 0 ? (
-                <option value="">Haz clic en refrescar para cargar</option>
+                <option value="">Click refresh to load devices</option>
               ) : null}
               {devices.map((d) => (
                 <option key={`${speaker}-${d.deviceId}`} value={d.deviceId}>
@@ -145,7 +145,7 @@ export default function SessionSetupDialog({
             icon={<FeatherRefreshCw />}
             onClick={onRefreshDevices}
           >
-            Refrescar dispositivos
+            Refresh devices
           </Button>
           <Button
             variant="brand-primary"
@@ -153,7 +153,7 @@ export default function SessionSetupDialog({
             disabled={isConnecting || adkHealth === 'offline'}
             onClick={onStart}
           >
-            {isConnecting ? 'Conectando...' : 'Iniciar sesión'}
+            {isConnecting ? 'Connecting...' : 'Start session'}
           </Button>
         </div>
       </div>

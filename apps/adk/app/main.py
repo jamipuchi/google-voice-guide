@@ -206,12 +206,18 @@ async def create_live_session(
     )
 
 
-async def create_text_session(
+async def create_coach_session(
     runner: Runner,
     user_id: str,
     session_suffix: str,
 ) -> LiveSession:
-    """Like create_live_session but uses TEXT modality — required for tool calls."""
+    """Create the coach session in audio mode and consume its transcription stream.
+
+    Native-audio Gemini live models currently reject text-only live sessions with
+    "Cannot extract voices from a non-audio request". Keeping the coach in audio
+    mode preserves tool calling while letting the frontend consume text through
+    output_audio_transcription events.
+    """
     session_id = f"{APP_NAME}-{session_suffix}-{user_id}"
     session = await session_service.get_session(
         app_name=APP_NAME,
@@ -227,7 +233,8 @@ async def create_text_session(
 
     run_config = RunConfig(
         streaming_mode=StreamingMode.BIDI,
-        response_modalities=[types.Modality.TEXT],
+        response_modalities=[types.Modality.AUDIO],
+        output_audio_transcription=types.AudioTranscriptionConfig(),
     )
     live_request_queue = LiveRequestQueue()
     live_events = runner.run_live(
@@ -325,10 +332,18 @@ async def coach_to_client(
 ) -> None:
     try:
         async for event in coach_session.live_events:
-            print(f"[COACH EVENT] turn_complete={event.turn_complete} partial={getattr(event, 'partial', None)} has_content={bool(event.content and event.content.parts)} has_transcription={bool(event.output_transcription and event.output_transcription.text)}", flush=True)
-
-            # Text-mode response: content.parts[].text
-            if event.content and event.content.parts:
+            next_buffer = extract_text_delta(event, connection_state.coach_buffer)
+            if next_buffer and next_buffer != connection_state.coach_buffer:
+                connection_state.coach_buffer = next_buffer
+                await send_json(
+                    websocket,
+                    {
+                        "type": "coach_suggestion",
+                        "text": next_buffer,
+                        "finished": False,
+                    },
+                )
+            elif event.content and event.content.parts:
                 for part in event.content.parts:
                     if part.text:
                         connection_state.coach_buffer += part.text
@@ -340,20 +355,6 @@ async def coach_to_client(
                                 "finished": False,
                             },
                         )
-
-            # Audio-mode fallback: output_transcription
-            if not (event.content and event.content.parts):
-                next_buffer = extract_text_delta(event, connection_state.coach_buffer)
-                if next_buffer and next_buffer != connection_state.coach_buffer:
-                    connection_state.coach_buffer = next_buffer
-                    await send_json(
-                        websocket,
-                        {
-                            "type": "coach_suggestion",
-                            "text": next_buffer,
-                            "finished": False,
-                        },
-                    )
 
             if event.turn_complete:
                 final_text = connection_state.coach_buffer.strip()
@@ -511,7 +512,7 @@ async def live_coach(websocket: WebSocket) -> None:
     our_user_session, counterpart_session, coach_session = await asyncio.gather(
         create_live_session(our_user_runner, user_id, "our-user"),
         create_live_session(counterpart_runner, user_id, "counterpart"),
-        create_text_session(make_coach_runner(websocket), user_id, "coach"),
+        create_coach_session(make_coach_runner(websocket), user_id, "coach"),
     )
 
     await send_json(
