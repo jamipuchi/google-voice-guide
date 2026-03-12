@@ -50,6 +50,11 @@ free_port() {
 free_port 5173
 free_port 8001
 
+echo "Ensuring Node.js dependencies are installed..."
+if [ ! -d "node_modules" ]; then
+  pnpm install
+fi
+
 echo "Syncing Python dependencies..."
 pnpm adk:sync
 

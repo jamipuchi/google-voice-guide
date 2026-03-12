@@ -77,9 +77,9 @@ export default function ContactDetailPage() {
   }
 
   return (
-    <div className="flex h-full w-full flex-col items-start bg-neutral-50">
+    <div className="flex min-h-screen w-full flex-col items-start bg-neutral-50">
       {/* Header */}
-      <div className="flex w-full items-center justify-between border-b border-solid border-neutral-border bg-default-background px-6 py-4 mobile:px-4 mobile:py-4">
+      <div className="sticky top-0 z-20 flex w-full items-center justify-between border-b border-solid border-neutral-border bg-default-background/95 px-6 py-4 backdrop-blur mobile:px-4 mobile:py-4">
         <span className="text-heading-3 font-heading-3 text-default-font">
           Coach en vivo
         </span>
@@ -144,9 +144,9 @@ export default function ContactDetailPage() {
       </div>
 
       {/* Body */}
-      <div className="flex w-full grow shrink-0 basis-0 items-start gap-6 overflow-hidden mobile:flex-col mobile:flex-nowrap mobile:gap-6">
+      <div className="flex w-full flex-1 items-start gap-6 mobile:flex-col mobile:flex-nowrap mobile:gap-6">
         {/* Left column */}
-        <div className="flex h-full flex-col items-start gap-6 px-6 py-6 w-1/2 overflow-auto mobile:h-auto mobile:w-full mobile:flex-none mobile:px-4 mobile:py-4">
+        <div className="flex w-1/2 flex-col items-start gap-6 px-6 py-6 mobile:h-auto mobile:w-full mobile:flex-none mobile:px-4 mobile:py-4">
           {/* Contact info card */}
           <div className="flex w-full flex-col items-start gap-6 rounded-lg border border-solid border-neutral-border bg-default-background px-6 py-6 shadow-sm mobile:px-4 mobile:py-4">
             <div className="flex w-full items-center gap-2">
@@ -389,8 +389,8 @@ export default function ContactDetailPage() {
         </div>
 
         {/* Right column */}
-        <div className="flex h-full flex-col items-start gap-6 border-l border-solid border-neutral-border bg-default-background px-6 py-6 w-1/2 overflow-auto mobile:h-auto mobile:flex-none mobile:px-4 mobile:py-4 mobile:w-1/2 mobile:overflow-auto mobile:border-l-0 mobile:border-t">
-          {/* Live call banner */}
+        <div className="flex w-1/2 flex-col items-start gap-6 border-l border-solid border-neutral-border bg-default-background px-6 py-6 mobile:h-auto mobile:w-full mobile:flex-none mobile:px-4 mobile:py-4 mobile:border-l-0 mobile:border-t">
+          {/* Live call banner — conditional */}
           {coach.isLive && (
             <div className="flex w-full items-center justify-between rounded-lg border border-solid border-error-100 bg-error-50 px-4 py-3">
               <div className="flex items-center gap-2">
