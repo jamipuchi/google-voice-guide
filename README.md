@@ -85,21 +85,6 @@ The main screen is split into two areas:
 
 The document itself is viewport-locked, and scrolling is handled inside the app panels.
 
-## Screenshot
-
-The intended README screenshot is the dashboard image provided in chat.
-If you want to store it in the repo, place it at:
-
-```text
-docs/live-coach-dashboard.png
-```
-
-Then add this line back into the README:
-
-```md
-![Live coach dashboard](docs/live-coach-dashboard.png)
-```
-
 ## Live Coaching Test Flow
 
 1. Put the phone call on speaker, or route both call participants into separate input devices.
